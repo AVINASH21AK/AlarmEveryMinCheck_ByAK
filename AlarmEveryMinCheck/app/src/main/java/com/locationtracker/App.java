@@ -25,6 +25,9 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -34,6 +37,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.OkHttpClient;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 
 public class App extends Application {
@@ -56,6 +64,7 @@ public class App extends Application {
     public static String App_plateform = "2";  //1 for IOS and 2 for Android
 
 
+    static public DatabaseHelper dbHelper;
 
 
     /*---- string ---*/
@@ -80,7 +89,7 @@ public class App extends Application {
 
         context = getApplicationContext();
         mInstance = this;
-
+        dbHelper = new DatabaseHelper(context);
 
     }
 
@@ -588,6 +597,39 @@ public class App extends Application {
         return Bitmap.createScaledBitmap(image, width, height, true);
     }
 
+
+    /*-----start Retrofit-----*/
+
+    public static OkHttpClient getClient() {
+        //OkHttpClient client =
+
+        return new OkHttpClient.Builder()
+                .connectTimeout(2, TimeUnit.MINUTES)
+                .readTimeout(2, TimeUnit.MINUTES)
+                .build();
+        //return client;
+    }
+
+    public static Retrofit getRetrofitBuilder() {
+
+        Gson gson = new GsonBuilder()
+                .setLenient()
+                .create();
+
+
+        return new Retrofit.Builder()
+                .baseUrl("strBaseUrl")
+                .client(getClient()) // it's optional for adding client
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                //.addConverterFactory(GsonConverterFactory.create())
+                .build();
+    }
+
+    public static ApiService getRetrofitApiService() {
+        return getRetrofitBuilder().create(ApiService.class);
+    }
+
+    /*-----end Retrofit-----*/
 
 
 
